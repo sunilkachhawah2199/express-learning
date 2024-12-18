@@ -1,31 +1,40 @@
-// index.js is entry point for our express code
-var express =require('express'); // import express
-var app=express();
+var express=require('express');
+var app= express();
 
-var things= require('./things.js'); // importing module
+// ---------- ---middleware
+/*
+middleware are a function who has acess to req and res object.
+this functions are used to modify req, res object for taks like parsing request bodies, adding response headers
+----------------third party middleware
+body-parser --> parse http request body
+cookie-parser --> parse cookie from body
+*/
 
-// we can have different method on same route
 
-app.get('/hello', (req, res)=>{
-    res.send("I am different -1");
-});
-
-
-app.post('/hello', (req,res)=>{
-    res.send("I am a different -2");
-});
-
-// express has --> all method to test all request on single path
-// this method is generally used for defining middleware
-
-app.all('/common', (req,res)=>{
-    res.send("I can accept all http request");
+// simple request time logger
+// this midddle ware will be called for every request
+app.use((req, res, next)=>{
+    console.log("A new request received at " + Date.now());
+   
+   //This function call is very important. It tells that more processing is
+   //required for the current request and is in the next middleware function route handler.
+   next();
 })
 
-// using things file function here
-// now all the request on /things will be transfered to things.js
 
-app.use('/things', things);
+// middleware for a specific route and for its subroute
+// middleware runs from top to bottom
+
+
+app.get('/user/human', (req, res)=>{
+    console.log("I will run before below middleware")
+    res.send("/users get request");
+})
+
+app.use('/user', (req, res, next)=>{
+    console.log('separate req for /users route');
+    next();
+});
 
 app.listen(3000, ()=>{
     console.log("server started");
